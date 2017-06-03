@@ -1,22 +1,26 @@
-const { babylon, traverse, types, generate } = require("../babel-to-go");
+const btg = require("../babel-to-go");
+const btgMin = require("../babel-to-go.min");
+
 const { expect } = require("chai");
 
-describe('babel-to-go', function() {
-  it("can rountrip from source to AST and back", function() {
-    let source = `console.log ("Hello, World!")`;
+[btg, btgMin].forEach(function(btg) {
+  describe('babel-to-go', function() {
+    it("can rountrip from source to AST and back", function() {
+      let source = `console.log ("Hello, World!")`;
 
-    let ast = babylon.parse(source);
+      let ast = btg.babylon.parse(source);
 
-    traverse(ast, {
-      StringLiteral: {
-        exit(path) {
-          path.replaceWith(types.stringLiteral(path.node.value.toUpperCase()));
-          path.skip();
+      btg.traverse(ast, {
+        StringLiteral: {
+          exit(path) {
+            path.replaceWith(btg.types.stringLiteral(path.node.value.toUpperCase()));
+            path.skip();
+          }
         }
-      }
-    });
+      });
 
-    let { code } = generate(ast);
-    expect(code).to.equal(`console.log("HELLO, WORLD!");`);
+      let { code } = btg.generate(ast);
+      expect(code).to.equal(`console.log("HELLO, WORLD!");`);
+    })
   })
 })

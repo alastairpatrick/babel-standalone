@@ -80,7 +80,13 @@ function webpackBuild(filename, libraryName, version) {
 }
 
 const minifyAndRename = lazypipe()
-  .pipe(uglify)
+  .pipe(uglify, {
+    output: {
+      // Babylon source code contains some string literals with characters outside the ascii range, using the \uxxxx form. Uglify want to transform these into UTF-8 encoded Unicode characters.
+      // Since this would not save a significant amount of file size and the original encoding potentially avoids character encoding ambiguities, prefer to retain the original encoding.
+      ascii_only: true,
+    },
+  })
   .pipe(rename, { extname: '.min.js' });
 
 gulp.task('default', ['build']);
