@@ -1,14 +1,14 @@
-import Parser, { plugins } from "../babylon/src/parser";
-import "../babylon/src/parser/util";
-import "../babylon/src/parser/statement";
-import "../babylon/src/parser/lval";
-import "../babylon/src/parser/expression";
-import "../babylon/src/parser/node";
-import "../babylon/src/parser/location";
-import "../babylon/src/parser/comments";
-import { types as tokTypes } from "../babylon/src/tokenizer/types";
-import "../babylon/src/tokenizer";
-import "../babylon/src/tokenizer/context";
+import Parser, { plugins } from "../submodules/babylon/src/parser";
+import "../submodules/babylon/src/parser/util";
+import "../submodules/babylon/src/parser/statement";
+import "../submodules/babylon/src/parser/lval";
+import "../submodules/babylon/src/parser/expression";
+import "../submodules/babylon/src/parser/node";
+import "../submodules/babylon/src/parser/location";
+import "../submodules/babylon/src/parser/comments";
+import { types as tokTypes } from "../submodules/babylon/src/tokenizer/types";
+import "../submodules/babylon/src/tokenizer";
+import "../submodules/babylon/src/tokenizer/context";
 
 export function parse(input, options) {
   return new Parser(options, input).parse();
