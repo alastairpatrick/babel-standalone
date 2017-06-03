@@ -98,12 +98,6 @@ function Add-GitHubReleaseAsset(
 
 ############################
 
-# Ensure environment is good
-if (!$Env:GITHUB_USER -or !$Env:GITHUB_REPO -or !$Env:GITHUB_TOKEN) {
-  Write-Error 'GITHUB_USER, GITHUB_REPO and GITHUB_TOKEN must be set'
-  Exit 1
-}
-
 if ($Clean) {
   Write-Output "Cleaning working directory"
   git reset --hard HEAD
@@ -113,19 +107,22 @@ if ($Clean) {
 
 # We need to run npm install in order to be able to use npm-check-updates
 npm install; Assert-LastExitCode
-#.\node_modules\.bin\npm-check-updates -u -a --packageFile ./package.json /^babel\-(plugin|preset|core)/; Assert-LastExitCode
-.\node_modules\.bin\npm-check-updates -u -a --packageFile ./package.json /^babel\-plugin/; Assert-LastExitCode
-.\node_modules\.bin\npm-check-updates -u -a --packageFile ./package.json /^babel\-preset/; Assert-LastExitCode
 .\node_modules\.bin\npm-check-updates -u -a --packageFile ./package.json /^babel\-core/; Assert-LastExitCode
+.\node_modules\.bin\npm-check-updates -u -a --packageFile ./package.json /^babel\-generator/; Assert-LastExitCode
+.\node_modules\.bin\npm-check-updates -u -a --packageFile ./package.json /^babel\-preset/; Assert-LastExitCode
+.\node_modules\.bin\npm-check-updates -u -a --packageFile ./package.json /^babel\-traverse/; Assert-LastExitCode
+.\node_modules\.bin\npm-check-updates -u -a --packageFile ./package.json /^babel\-types/; Assert-LastExitCode
+.\node_modules\.bin\npm-check-updates -u -a --packageFile ./package.json /^babylon/; Assert-LastExitCode
 
 $package_json = Get-Content -Path package.json | ConvertFrom-Json
-$babel_version = Get-LatestDependencyVersion -Package $package_json -Filter 'babel\-(plugin|preset|core)'
+$babel_version = Get-LatestDependencyVersion -Package $package_json -Filter 'babel\-(core|generator|preset|traverse|types)'
 if (([Version]$package_json.version) -ge $babel_version) {
   Write-Output ('Current version ({0}) is the latest' -f $package_json.version)
   Exit
 }
 
 Write-Output ('Current version is {0}, latest Babel version is {1}' -f $package_json.version, $babel_version)
+
 
 Set-PackageVersion -Package $package_json -Version $babel_version
 # Re-run npm install fresh in order to install any updated packages
@@ -134,12 +131,32 @@ Set-PackageVersion -Package $package_json -Version $babel_version
 Remove-Item node_modules -Recurse
 npm install; Assert-LastExitCode
 
+
+# For the babylon submodule, checkout the same version of babylon that babel is using as a dependency.
+$babylon_package_json = Get-Content -Path node_modules/babylon/package.json | ConvertFrom-Json
+$babylon_tag = "v$($babylon_package_json.version)"
+Write-Output ('Babylon version is {0} and git tag should be {1}' -f $babylon_package_json.version, $babylon_tag)
+
+git -C submodules/babylon stash save -u; Assert-LastExitCode
+git -C submodules/babylon checkout tags/$babylon_tag; Assert-LastExitCode
+
+
+# Synchonize babylon submodule with babylon dependency
 Write-Output 'Building and running tests'
 npm run build; Assert-LastExitCode
 npm run test; Assert-LastExitCode
 
 Write-Output 'Build looks okay, committing and pushing changes'
-git commit -m ('Upgrade to Babel {0}' -f $babel_version) --author='DanBuild <build@dan.cx>' package.json; Assert-LastExitCode
+
+git add submodules/babylon package.json -A; Assert-LastExitCode
+
+# Ensure environment is good
+if (!$Env:GITHUB_USER -or !$Env:GITHUB_REPO -or !$Env:GITHUB_TOKEN) {
+  Write-Error 'GITHUB_USER, GITHUB_REPO and GITHUB_TOKEN must be set'
+  Exit 1
+}
+
+git commit -m ('Upgrade to Babel {0}' -f $babel_version) --author='alastairpatrick@gmail.com'; Assert-LastExitCode
 git tag -a ('release-' + $babel_version) -m ('Automated upgrade to Babel {0}' -f $babel_version); Assert-LastExitCode
 
 # Push to Github
@@ -148,10 +165,8 @@ git push origin master --follow-tags; Assert-LastExitCode
 # Push to GitHub releases
 Write-Output "Creating GitHub release..."
 $release = New-GitHubRelease -Version $babel_version
-Add-GitHubReleaseAsset -Release $release -Path ./babel.js
-Add-GitHubReleaseAsset -Release $release -Path ./babel.min.js
-Add-GitHubReleaseAsset -Release $release -Path ./packages/babili-standalone/babili.js
-Add-GitHubReleaseAsset -Release $release -Path ./packages/babili-standalone/babili.min.js
+Add-GitHubReleaseAsset -Release $release -Path ./babel-to-go.js
+Add-GitHubReleaseAsset -Release $release -Path ./babel-to-go.min.js
 
 # Push to npm
 if ($PublishNpm) {
