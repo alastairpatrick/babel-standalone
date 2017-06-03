@@ -1,5 +1,6 @@
 const gulp = require('gulp');
 const lazypipe = require('lazypipe');
+const path = require('path');
 const pump = require('pump');
 const rename = require('gulp-rename');
 const webpack = require('webpack');
@@ -19,7 +20,7 @@ function webpackBuild(filename, libraryName, version) {
             // their project.json (or a ".babelrc" file). We need to ignore
             // those as we're using our own Babel options.
             babelrc: false,
-            presets: ['es2015', 'stage-0'],
+            presets: ['flow', 'es2015', 'stage-0'],
           }
         },
         {
@@ -55,6 +56,14 @@ function webpackBuild(filename, libraryName, version) {
         /..\/..\/package/,
         '../../../../src/babel-package-shim'
       ),
+      new webpack.NormalModuleReplacementPlugin(
+        /^babylon/,
+        path.join(__dirname, "src", "babylon")
+      ),
+      new webpack.NormalModuleReplacementPlugin(
+        /.\/source-map/,
+        path.join(__dirname, "src", "source-map")
+      ),
       new webpack.optimize.OccurenceOrderPlugin(),
       new webpack.optimize.DedupePlugin()
     ]
@@ -75,23 +84,14 @@ const minifyAndRename = lazypipe()
   .pipe(rename, { extname: '.min.js' });
 
 gulp.task('default', ['build']);
-gulp.task('build', ['build-babel', 'build-babili']);
+gulp.task('build', ['build-babel-to-go']);
 
-gulp.task('build-babel', cb => {
+gulp.task('build-babel-to-go', cb => {
   pump([
     gulp.src('src/index.js'),
-    webpackBuild('babel.js', 'Babel', require('./package.json').version),
+    webpackBuild('babel-to-go.js', 'babel-to-go', require('./package.json').version),
     gulp.dest('.'),
     minifyAndRename(),
     gulp.dest('.'),
-  ], cb);
-});
-gulp.task('build-babili', cb => {
-  pump([
-    gulp.src('src/babili.js'),
-    webpackBuild('babili.js', 'Babili', require('./packages/babili-standalone/package.json').version),
-    gulp.dest('packages/babili-standalone/'),
-    minifyAndRename(),
-    gulp.dest('packages/babili-standalone/'),
   ], cb);
 });

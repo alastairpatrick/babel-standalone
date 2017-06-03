@@ -1,7 +1,5 @@
-/babel.js
-/babel.min.js
-packages/babili-standalone/babili.js
-packages/babili-standalone/babili.min.js
+/babel-to-go.js
+/babel-to-go.min.js
 site/vendor
 
 # Logs
