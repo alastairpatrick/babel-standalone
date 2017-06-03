@@ -1,0 +1,3 @@
+[submodule "babylon"]
+	path = babylon
+	url = https://github.com/babel/babylon
