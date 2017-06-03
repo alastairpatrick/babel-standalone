@@ -95,7 +95,7 @@ gulp.task('build', ['build-babel-to-go']);
 gulp.task('build-babel-to-go', cb => {
   pump([
     gulp.src('src/index.js'),
-    webpackBuild('babel-to-go.js', 'babel-to-go', require('./package.json').version),
+    webpackBuild('babel-to-go.js', 'Babel', require('./package.json').version),
     gulp.dest('.'),
     minifyAndRename(),
     gulp.dest('.'),

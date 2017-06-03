@@ -11,39 +11,38 @@ After gzip compression, babel-to-go.min.js is about 100KB in size. For compariso
 Example Usage
 =============
 
-```js
-const {
-  babylon,
-  generate
-  traverse,
-  types,
-} = require("babel-to-go");
+```html
+<script src="../babel-to-go.min.js"></script>
+<script>
+  var babylon = Babel.babylon;
+  var traverse = Babel.traverse;
+  var types = Babel.types;
+  var generate = Babel.generate;
 
-let source = `
-for (let i = 0; i < 3; ++i) {
-  console.log("Hello, World!");
-}
-`;
+  var source = "for (var i = 0; i !== 3; ++i) {\n" +
+               "  console.log('Hello, World!');\n" +
+               "}\n";
 
-let ast = babylon.parse(source);
+  var ast = babylon.parse(source);
 
-traverse(ast, {
-  StringLiteral: {
-    exit(path) {
-      path.replaceWith(types.stringLiteral(
-        path.node.value.toUpperCase()));
-      path.skip();
+  traverse(ast, {
+    StringLiteral: {
+      exit(path) {
+        path.replaceWith(types.stringLiteral(
+          path.node.value.toUpperCase()));
+        path.skip();
+      }
     }
-  }
-});
+  });
 
-let { code } = generate(ast);
-let fn = new Function(code);
-fn();
+  var result = generate(ast);
+  var fn = new Function(result.code);
+  fn();
 
-// HELLO, WORLD!
-// HELLO, WORLD!
-// HELLO, WORLD!
+  // HELLO, WORLD!
+  // HELLO, WORLD!
+  // HELLO, WORLD!
+</script>
 ```
 
 Installing
