@@ -109,13 +109,14 @@ if ($Clean) {
 npm install; Assert-LastExitCode
 .\node_modules\.bin\npm-check-updates -u -a --packageFile ./package.json /^babel\-core/; Assert-LastExitCode
 .\node_modules\.bin\npm-check-updates -u -a --packageFile ./package.json /^babel\-generator/; Assert-LastExitCode
+.\node_modules\.bin\npm-check-updates -u -a --packageFile ./package.json /^babel\-plugin/; Assert-LastExitCode
 .\node_modules\.bin\npm-check-updates -u -a --packageFile ./package.json /^babel\-preset/; Assert-LastExitCode
 .\node_modules\.bin\npm-check-updates -u -a --packageFile ./package.json /^babel\-traverse/; Assert-LastExitCode
 .\node_modules\.bin\npm-check-updates -u -a --packageFile ./package.json /^babel\-types/; Assert-LastExitCode
 .\node_modules\.bin\npm-check-updates -u -a --packageFile ./package.json /^babylon/; Assert-LastExitCode
 
 $package_json = Get-Content -Path package.json | ConvertFrom-Json
-$babel_version = Get-LatestDependencyVersion -Package $package_json -Filter 'babel\-(core|generator|preset|traverse|types)'
+$babel_version = Get-LatestDependencyVersion -Package $package_json -Filter 'babel\-(core|generator|plugin|preset|traverse|types)'
 if (([Version]$package_json.version) -ge $babel_version) {
   Write-Output ('Current version ({0}) is the latest' -f $package_json.version)
   Exit

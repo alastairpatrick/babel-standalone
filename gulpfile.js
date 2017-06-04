@@ -1,11 +1,15 @@
+const babel = require('rollup-plugin-babel');
+const file = require('gulp-file');
 const gulp = require('gulp');
 const lazypipe = require('lazypipe');
+const nodeResolve = require("rollup-plugin-node-resolve");
 const path = require('path');
 const pump = require('pump');
 const rename = require('gulp-rename');
+const { rollup } = require('rollup');
+const uglify = require('gulp-uglify');
 const webpack = require('webpack');
 const webpackStream = require('webpack-stream');
-const uglify = require('gulp-uglify');
 
 function webpackBuild(filename, libraryName, version) {
   const config = {
@@ -58,7 +62,7 @@ function webpackBuild(filename, libraryName, version) {
       ),
       new webpack.NormalModuleReplacementPlugin(
         /^babylon/,
-        path.join(__dirname, "src", "babylon")
+        path.join(__dirname, "intermediate", "babylon")
       ),
       new webpack.NormalModuleReplacementPlugin(
         /.\/source-map/,
@@ -90,9 +94,28 @@ const minifyAndRename = lazypipe()
   .pipe(rename, { extname: '.min.js' });
 
 gulp.task('default', ['build']);
-gulp.task('build', ['build-babel-to-go']);
+gulp.task('build', ['rollup', 'webpack']);
 
-gulp.task('build-babel-to-go', cb => {
+gulp.task('rollup', function() {
+  return rollup({
+    entry: 'src/babylon.js',
+    plugins: [
+      babel(),
+      nodeResolve(),
+    ]
+  })
+  .then(bundle => {
+    return bundle.generate({
+      format: 'cjs'
+    });
+  })
+  .then(gen => {
+    return file('babylon.js', gen.code, {src: true})
+      .pipe(gulp.dest('intermediate/'))
+  });
+});
+
+gulp.task('webpack', ['rollup'], cb => {
   pump([
     gulp.src('src/index.js'),
     webpackBuild('babel-to-go.js', 'Babel', require('./package.json').version),

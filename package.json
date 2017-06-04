@@ -20,13 +20,15 @@
     "babel-core": "6.24.1",
     "babel-generator": "6.24.1",
     "babel-loader": "^7.0.0",
+    "babel-plugin-external-helpers": "6.22.0",
+    "babel-plugin-transform-flow-strip-types": "6.22.0",
     "babel-preset-es2015": "6.24.1",
-    "babel-preset-flow": "6.23.0",
     "babel-preset-stage-0": "6.24.1",
     "babel-traverse": "6.24.1",
     "babel-types": "6.24.1",
     "chai": "^4.0.1",
     "gulp": "^3.9.1",
+    "gulp-file": "^0.3.0",
     "gulp-rename": "^1.2.2",
     "gulp-uglify": "^2.0.1",
     "json-loader": "^0.5.4",
@@ -45,7 +47,5 @@
     "url": "https://github.com/alastairpatrick/babel-to-go/issues"
   },
   "homepage": "https://github.com/alastairpatrick/babel-to-go",
-  "dependencies": {
-    
-  }
+  "dependencies": {}
 }

@@ -1,5 +1,7 @@
 /babel-to-go.js
 /babel-to-go.min.js
+/intermediate/
+
 site/vendor
 
 # Logs
