@@ -1,6 +1,6 @@
 {
   "name": "babel-to-go",
-  "version": "6.24.1",
+  "version": "6.24.2",
   "description": "Standalone build of babylon, babel-traverse, babel-types and babel-generate for use in browsers.",
   "main": "babel-to-go.js",
   "scripts": {
